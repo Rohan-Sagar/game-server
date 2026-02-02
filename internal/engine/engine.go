@@ -35,7 +35,13 @@ func (e *Engine) HandleAction(action, playerId string, skillRating int, region t
 }
 
 func (e *Engine) handleEnter(playerId string, skillRating int, region types.Region) ActionResult {
-	player := NewPlayer(playerId, skillRating, region)
+	player, err := NewPlayer(playerId, skillRating, region)
+	if err != nil {
+		return ActionResult{
+			Success: false,
+			Message: err.Error(),
+		}
+	}
 	e.WaitingRoom[player.Id] = player
 
 	return ActionResult{

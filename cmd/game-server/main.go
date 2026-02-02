@@ -28,9 +28,9 @@ func main() {
 }
 
 func parseCLI(e *engine.Engine) {
-	action := flag.String("action", "ENTER", "Action")
-	player_id := flag.String("player_id", "rohan", "Player ID")
-	skill_rating := flag.Int("skill_rating", 1500, "Skill Rating")
+	action := flag.String("action", "", "Action")
+	player_id := flag.String("player_id", "", "Player ID")
+	skill_rating := flag.Int("skill_rating", 0, "Skill Rating")
 	var region types.Region = types.UsEast
 
 	allowedRegions := []string{string(types.UsEast), string(types.UsWest)}
