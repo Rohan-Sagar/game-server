@@ -14,6 +14,7 @@ type ActionResult struct {
 	Success bool
 	Message string
 	Player  *Player
+	Match   *Match
 }
 
 func NewEngine() *Engine {
@@ -26,6 +27,8 @@ func (e *Engine) HandleAction(action, playerId string, skillRating int, region t
 	switch action {
 	case "ENTER":
 		return e.handleEnter(playerId, skillRating, region)
+	case "TICK":
+		return e.handleTick()
 	default:
 		return ActionResult{
 			Success: false,
@@ -55,6 +58,20 @@ func (e *Engine) handleEnter(playerId string, skillRating int, region types.Regi
 		Success: true,
 		Message: "Player added to waiting room",
 		Player:  player,
+	}
+}
+
+func (e *Engine) handleTick() ActionResult {
+	var players []Player
+	for _, value := range e.WaitingRoom {
+		players = append(players, *value)
+	}
+	match := NewMatch(players)
+
+	return ActionResult{
+		Success: true,
+		Message: "Started Match",
+		Match:   match,
 	}
 }
 

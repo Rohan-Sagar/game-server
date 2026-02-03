@@ -39,21 +39,35 @@ func parseCLI(e *engine.Engine) {
 		if !scanner.Scan() {
 			break
 		}
+		var result engine.ActionResult
+
 		line := strings.Split(scanner.Text(), " ")
 		action := line[0]
-		player_id := strings.Split(line[1], "=")[1]
-		skill_rating, err := strconv.Atoi(strings.Split(line[2], "=")[1])
-		if err != nil {
-			panic("what the helly")
 
+		switch action {
+		case "ENTER":
+			player_id := strings.Split(line[1], "=")[1]
+			skill_rating, err := strconv.Atoi(strings.Split(line[2], "=")[1])
+
+			if err != nil {
+				panic("what the helly")
+
+			}
+			region := types.Region(strings.Split(line[3], "=")[1])
+
+			result = e.HandleAction(action, player_id, skill_rating, region)
+		case "TICK":
+			result = e.HandleAction(action, "", 0, "us-east")
+		default:
+			panic("wrong code")
 		}
-		region := types.Region(strings.Split(line[3], "=")[1])
-
-		result := e.HandleAction(action, player_id, skill_rating, region)
 
 		if result.Success {
 			if result.Player != nil {
-				fmt.Printf("QUEUED player_id=%s, skill_rating=%d, region=%s\n", player_id, skill_rating, region)
+				fmt.Printf("QUEUED player_id=%s skill_rating=%d region=%s queue_join_time=%v\n", result.Player.Id, result.Player.SkillRating, result.Player.Region, result.Player.QueueEntryTime)
+			}
+			if result.Match != nil {
+				fmt.Printf("MATCH match_id=%d players=%v average_skill=%f formationTime=%v CreatedAt=%v", result.Match.Id, result.Match.Players, result.Match.AverageSkill, result.Match.FormationTime, result.Match.CreatedAt)
 			}
 		}
 
