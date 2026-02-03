@@ -35,6 +35,12 @@ func (e *Engine) HandleAction(action, playerId string, skillRating int, region t
 }
 
 func (e *Engine) handleEnter(playerId string, skillRating int, region types.Region) ActionResult {
+	if _, ok := e.WaitingRoom[playerId]; ok {
+		return ActionResult{
+			Success: false,
+			Message: "Player already exists in waiting room",
+		}
+	}
 	player, err := NewPlayer(playerId, skillRating, region)
 	if err != nil {
 		return ActionResult{
@@ -42,6 +48,7 @@ func (e *Engine) handleEnter(playerId string, skillRating int, region types.Regi
 			Message: err.Error(),
 		}
 	}
+
 	e.WaitingRoom[player.Id] = player
 
 	return ActionResult{

@@ -15,6 +15,7 @@ type Player struct {
 }
 
 // create and validate new player
+// checks if id is empty string and skill_rating in the correct age
 func NewPlayer(id string, skillRating int, region types.Region) (*Player, error) {
 	if id == "" {
 		return nil, fmt.Errorf("playerId cannot be empty\n")

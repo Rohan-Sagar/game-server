@@ -1,9 +1,11 @@
 package main
 
 import (
-	"flag"
+	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/rohan-sagar/game-server/internal/engine"
 	"github.com/rohan-sagar/game-server/internal/types"
@@ -28,36 +30,37 @@ func main() {
 }
 
 func parseCLI(e *engine.Engine) {
-	action := flag.String("action", "", "Action")
-	player_id := flag.String("player_id", "", "Player ID")
-	skill_rating := flag.Int("skill_rating", 0, "Skill Rating")
-	var region types.Region = types.UsEast
+	scanner := bufio.NewScanner(os.Stdin)
 
-	allowedRegions := []string{string(types.UsEast), string(types.UsWest)}
-	usage := fmt.Sprintf("Region must be one of the %v", allowedRegions)
-	flag.Func("region", usage, func(val string) error {
-		for _, allowed := range allowedRegions {
-			if val == allowed {
-				region = types.Region(val)
-				return nil
+	fmt.Println()
+
+	for {
+		fmt.Print("> ")
+		if !scanner.Scan() {
+			break
+		}
+		line := strings.Split(scanner.Text(), " ")
+		action := line[0]
+		player_id := strings.Split(line[1], "=")[1]
+		skill_rating, err := strconv.Atoi(strings.Split(line[2], "=")[1])
+		if err != nil {
+			panic("what the helly")
+
+		}
+		region := types.Region(strings.Split(line[3], "=")[1])
+
+		result := e.HandleAction(action, player_id, skill_rating, region)
+
+		if result.Success {
+			if result.Player != nil {
+				fmt.Printf("QUEUED player_id=%s, skill_rating=%d, region=%s\n", player_id, skill_rating, region)
 			}
 		}
-		return fmt.Errorf("Invalid region: %s", region)
-	})
 
-	flag.Parse()
-
-	result := e.HandleAction(*action, *player_id, *skill_rating, region)
-
-	fmt.Printf("%s\n", result.Message)
-	if result.Success {
-		if result.Player != nil {
-			fmt.Printf("  Player: %+v\n", *result.Player)
+		if action == "ENTER" {
+			fmt.Println()
+			e.PrintWaitingRoom()
 		}
-	}
 
-	if *action == "STATUS" || *action == "ENTER" {
-		fmt.Println()
-		e.PrintWaitingRoom()
 	}
 }
